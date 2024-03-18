@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "494650606912",
+    "project_id": "pmart-38cb6",
+    "storage_bucket": "pmart-38cb6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494650606912:android:328ab092c442f0af9a66a5",
+        "android_client_info": {
+          "package_name": "com.example.p_mart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABOJ2RAAeM1UCNO5lalDJrR5WUw31xJLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
