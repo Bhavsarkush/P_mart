@@ -8,7 +8,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../color.dart';
 
-
 class EditBanner extends StatefulWidget {
   final String bannerId;
   final String bannerName;
@@ -48,9 +47,9 @@ class _EditBannerState extends State<EditBanner> {
   Future<void> _updateBanner() async {
     final bannerName = _bannerController.text.trim();
 
-    if (bannerName.isEmpty) {
+    if (bannerName.isEmpty && _selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter the banner name')),
+        const SnackBar(content: Text('Please enter the banner name or select an image')),
       );
       return;
     }
@@ -71,19 +70,21 @@ class _EditBannerState extends State<EditBanner> {
         _imageUrl = await referenceImageToUpload.getDownloadURL();
       }
 
-      await FirebaseFirestore.instance
-          .collection("Banner")
-          .doc(widget.bannerId)
-          .update({
-        'Banner name': bannerName,
-        'image': _imageUrl,
-      });
+      if (bannerName.isNotEmpty || _selectedImage != null) {
+        await FirebaseFirestore.instance
+            .collection("Banner")
+            .doc(widget.bannerId)
+            .update({
+          if (bannerName.isNotEmpty) 'Banner name': bannerName,
+          if (_selectedImage != null) 'image': _imageUrl,
+        });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Banner Updated Successfully")),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Banner Updated Successfully")),
+        );
 
-      Navigator.pop(context); // Navigate back after update
+        Navigator.pop(context); // Navigate back after update
+      }
     } catch (error) {
       print('Error updating banner: $error');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -101,7 +102,10 @@ class _EditBannerState extends State<EditBanner> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: valo,
-        title: const Text('Edit Banner',style: TextStyle(color: CupertinoColors.white),),
+        title: const Text(
+          'Edit Banner',
+          style: TextStyle(color: CupertinoColors.white),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -136,18 +140,22 @@ class _EditBannerState extends State<EditBanner> {
                   _selectedImage = File(file.path);
                 });
               },
-              style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  backgroundColor:valo ),
-              child: const Text('Select Image',style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                backgroundColor: valo,
+              ),
+              child: const Text('Select Image', style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _isLoading ? null : _updateBanner,
-              style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  backgroundColor:valo ),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                backgroundColor: valo,
+              ),
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Update Banner',style: TextStyle(color: Colors.white)),
+                  : const Text('Update Banner', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

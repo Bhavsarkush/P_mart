@@ -1,5 +1,4 @@
 import 'dart:core';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProductModel {
@@ -7,7 +6,7 @@ class ProductModel {
   List<String>? images;
   final String category;
   final String subcategory;
-  final String categoryName;
+  // final String categoryName;
   final String productName;
   final String productPrice;
   final String color;
@@ -22,12 +21,13 @@ class ProductModel {
   final String title4;
   final String discount;
   final String newPrice;
+  final String allDetail;
 
   ProductModel({
     required this.id,
     required this.images,
     required this.category,
-    required this.categoryName,
+    // required this.categoryName,
     required this.subcategory,
     required this.productName,
     required this.productPrice,
@@ -43,6 +43,7 @@ class ProductModel {
     required this.title4,
     required this.discount,
     required this.newPrice,
+    required this.allDetail,
   });
 
   factory ProductModel.fromSnapshot(DocumentSnapshot snapshot) {
@@ -56,17 +57,19 @@ class ProductModel {
       productPrice: data['productPrice'] ?? '',
       color: data['productColor'] ?? '',
       productDescription: data['productDescription'] ?? '',
-      product1: data['productTitleDetail1'] ?? '',
-      product2: data['productTitleDetail2'] ?? '',
-      product3: data['productTitleDetail3'] ?? '',
-      product4: data['productTitleDetail4'] ?? '',
+      product1: data['productDetail1'] ?? '',
+      product2: data['productDetail2'] ?? '',
+      product3: data['productDetail3'] ?? '',
+      product4: data['productDetail4'] ?? '',
       title1: data['productTitle1'] ?? '',
       title2: data['productTitle2'] ?? '',
       title3: data['productTitle3'] ?? '',
       title4: data['productTitle4'] ?? '',
-      discount: data['discount'] ?? '',
+      discount: data['ProductDiscount'] ?? '',
       newPrice: data['productNewPrice'] ?? '',
-      categoryName: '',
+      allDetail: data['allProduct'] ?? '',
+
+
     );
   }
 

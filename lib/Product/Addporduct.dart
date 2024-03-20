@@ -1,185 +1,198 @@
+// ignore_for_file: unnecessary_null_comparison, avoid_print
+
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../Category/categorymodel.dart';
+import '../../category/categoryModel.dart';
 import '../Subcategory-Model/ModelSubCategory.dart';
 import '../color.dart';
 
-class addProductsScreen extends StatefulWidget {
-  const addProductsScreen({Key? key}) : super(key: key);
+class addProductScreen extends StatefulWidget {
+  const addProductScreen({super.key});
 
   @override
-  State<addProductsScreen> createState() => _addProductsScreenState();
+  State<addProductScreen> createState() => _addProductScreenState();
 }
 
-class _addProductsScreenState extends State<addProductsScreen> {
-  String? selectedCategory;
-  String? selectedSubCategory;
-  bool isLoading = false;
-  String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
-  List<File> selectedImages = [];
+class _addProductScreenState extends State<addProductScreen> {
+  TextEditingController subcategory_name = TextEditingController();
 
-  final TextEditingController productController = TextEditingController();
-  final TextEditingController priceController = TextEditingController();
-  final TextEditingController discountController = TextEditingController();
-  final TextEditingController newpriceController = TextEditingController();
-  final TextEditingController colorController = TextEditingController();
-  final TextEditingController product1Controller = TextEditingController();
-  final TextEditingController title1Controller = TextEditingController();
-  final TextEditingController product2Controller = TextEditingController();
-  final TextEditingController title2Controller = TextEditingController();
-  final TextEditingController product3Controller = TextEditingController();
-  final TextEditingController title3Controller = TextEditingController();
-  final TextEditingController product4Controller = TextEditingController();
-  final TextEditingController title4Controller = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+  String? selectedSubCategory;
+  String? selectedCategory;
+
+  String uniquefilename = DateTime.now().millisecondsSinceEpoch.toString();
+  List<File> selectedImage = [];
+  bool isLoading = false;
+
+  TextEditingController product_name = TextEditingController();
+  TextEditingController product_price = TextEditingController();
+  TextEditingController discount = TextEditingController();
+  TextEditingController product_newprice = TextEditingController();
+  TextEditingController product_color = TextEditingController();
+  TextEditingController product_title1 = TextEditingController();
+  TextEditingController product_detail1 = TextEditingController();
+  TextEditingController product_title2 = TextEditingController();
+  TextEditingController product_detail2 = TextEditingController();
+  TextEditingController product_title3 = TextEditingController();
+  TextEditingController product_detail3 = TextEditingController();
+  TextEditingController product_title4 = TextEditingController();
+  TextEditingController product_detail4 = TextEditingController();
+  TextEditingController all_details = TextEditingController();
+  TextEditingController product_Description = TextEditingController();
+
+  // Generate a unique productId
+  final productId = FirebaseFirestore.instance.collection("Products").doc().id;
 
   Future<bool> doesProductExist(String productName) async {
     final querySnapshot = await FirebaseFirestore.instance
-        .collection('Products')
-        .where('productName', isEqualTo: productName)
+        .collection("Products")
+        .where("productName", isEqualTo: productName)
         .get();
-
     return querySnapshot.docs.isNotEmpty;
   }
 
-  Future<void> addProductToFirestore() async {
+  Future<void> addProductsToFireStore() async {
     final category = selectedCategory;
-    final subCategory = selectedSubCategory;
-    final productName = productController.text.trim();
-    final productPrice = priceController.text.trim();
-    final productDiscount = discountController.text.trim();
-    final productNewPrice = newpriceController.text.trim();
-    final productColor = colorController.text.trim();
-    final productTitle1 = title1Controller.text.trim();
-    final productTitleDetail1 = title1Controller.text.trim();
-    final productTitle2 =title2Controller.text.trim();
-    final productTitleDetail2 = title2Controller.text.trim();
-    final productTitle3 = title3Controller.text.trim();
-    final productTitleDetail3 = title3Controller.text.trim();
-    final productTitle4 = title4Controller.text.trim();
-    final productTitleDetail4 = title4Controller.text.trim();
-    final productDescription = descriptionController.text.trim();
-
+    final subcategory = selectedSubCategory;
+    final productName = product_name.text.trim();
+    final productPrice = product_price.text.trim();
+    final productDiscount = discount.text.trim();
+    final productNewPrice = product_newprice.text.trim();
+    final color = product_color.text.trim();
+    final productTitle1 = product_title1.text.trim();
+    final productTitle2 = product_title2.text.trim();
+    final productTitle3 = product_title3.text.trim();
+    final productTitle4 = product_title4.text.trim();
+    final productDetail1 = product_detail1.text.trim();
+    final productDetail2 = product_detail2.text.trim();
+    final productDetail3 = product_detail3.text.trim();
+    final productDetail4 = product_detail4.text.trim();
+    final allProduct = all_details.text.trim();
+    final description = product_Description.text.trim();
 
     if (category == null || category.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category')),
+        const SnackBar(content: Text("Please Select Category")),
       );
       return;
     }
-
-    if (subCategory == null || subCategory.isEmpty) {
+    if (subcategory == null || subcategory.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select a SubCategory")),
+        const SnackBar(content: Text("Please Select SubCategory")),
       );
       return;
     }
-
     if (productName.isEmpty ||
         productPrice.isEmpty ||
         productDiscount.isEmpty ||
         productNewPrice.isEmpty ||
-        productColor.isEmpty ||
+        color.isEmpty ||
         productTitle1.isEmpty ||
-        productTitleDetail1.isEmpty ||
         productTitle2.isEmpty ||
-        productTitleDetail2.isEmpty ||
         productTitle3.isEmpty ||
-        productTitleDetail3.isEmpty ||
         productTitle4.isEmpty ||
-        productTitleDetail4.isEmpty ||
-        productDescription.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Please fill in all fields"),
-      ));
-
+        productDetail1.isEmpty ||
+        productDetail2.isEmpty ||
+        productDetail3.isEmpty ||
+        productDetail4.isEmpty ||
+        allProduct.isEmpty ||
+        description.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please Enter Field")),
+      );
       return;
     }
+    final doesExsit = doesProductExist(productName);
 
-    final doesExist = await doesProductExist(productName);
-
-    if (doesExist) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Product Already exist')));
+    if (await doesExsit) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please Enter Product Name")),
+      );
     } else {
       setState(() {
         isLoading = true;
       });
-      if (selectedImages.isNotEmpty) {
+      if (selectedImage.isNotEmpty) {
         Reference referenceRoot = FirebaseStorage.instance.ref();
         Reference referenceDirImages = referenceRoot.child('Product_Images');
         Reference referenceImageToUpload =
-        referenceDirImages.child(uniqueFileName);
-
+            referenceDirImages.child(uniquefilename);
         try {
-          for (var image in selectedImages) {
-            await referenceImageToUpload.putFile(image);
-          }
-          final List<String> imageUrls = await Future.wait(selectedImages.map(
-                  (image) async => await referenceImageToUpload.getDownloadURL()));
+          final List<String> imageUrls = [];
+          for (var i = 0; i < selectedImage.length; i++) {
+            Reference referenceImageToUpload =
+                referenceDirImages.child('$uniquefilename-$i');
 
-          print('Image Urls:');
+            await referenceImageToUpload.putFile(selectedImage[i]);
+
+            // Get the download URL for each image
+            String imageUrl = await referenceImageToUpload.getDownloadURL();
+            imageUrls.add(imageUrl);
+          }
+          // Print URLs to the debug console
+          print('Image URLs:');
           for (var url in imageUrls) {
             print(url);
           }
-
           FirebaseFirestore.instance.collection("Products").add({
+            'productId': productId, // Add productId to the document
             'category': category,
-            'subcategory': subCategory,
+            'subCategory': subcategory,
             'productName': productName,
             'productPrice': productPrice,
-            'productColor': productColor,
-            'productDescription': productDescription,
+            'productColor': color,
+            'productDescription': description,
             'productTitle1': productTitle1,
             'productTitle2': productTitle2,
             'productTitle3': productTitle3,
             'productTitle4': productTitle4,
-            'productTitleDetail1': productTitleDetail1,
-            'productTitleDetail2': productTitleDetail2,
-            'productTitleDetail3': productTitleDetail3,
-            'productTitleDetail4': productTitleDetail4,
-            'productDiscount': productDiscount,
+            'productDetail1': productDetail1,
+            'productDetail2': productDetail2,
+            'productDetail3': productDetail3,
+            'productDetail4': productDetail4,
+            'ProductDiscount': productDiscount,
             'productNewPrice': productNewPrice,
+            'allProduct': allProduct,
             'images': imageUrls,
           }).then((value) {
-            selectedImages.clear();
-
-
-            productController.clear();
-            priceController.clear();
-            colorController.clear();
-            descriptionController.clear();
-            product1Controller.clear();
-            title1Controller.clear();
-            product2Controller.clear();
-            title2Controller.clear();
-            product3Controller.clear();
-            title3Controller.clear();
-            product4Controller.clear();
-            title4Controller.clear();
-            descriptionController.clear();
-            newpriceController.clear();
-
-            selectedCategory = null;
-            selectedSubCategory = null;
-
+            selectedImage.clear();
             setState(() {
               isLoading = false;
             });
 
+            product_name.clear();
+            product_price.clear();
+            discount.clear();
+            product_newprice.clear();
+            product_color.clear();
+            product_title1.clear();
+            product_title2.clear();
+            product_title3.clear();
+            product_title4.clear();
+            product_detail1.clear();
+            product_detail2.clear();
+            product_detail3.clear();
+            product_detail4.clear();
+            all_details.clear();
+            product_Description.clear();
+            selectedCategory = null;
+            selectedSubCategory = null;
+
             ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Product Added Successfully')));
+              const SnackBar(content: Text("Product Added Successfully")),
+            );
           });
         } catch (error) {
-          print("Error uploading images: $error");
+          print("Error Uploading Image $error");
         }
+        ;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Please select images")));
+          const SnackBar(content: Text("Please Select Images")),
+        );
         setState(() {
           isLoading = false;
         });
@@ -191,69 +204,74 @@ class _addProductsScreenState extends State<addProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Add Products',
-          style: TextStyle(color: CupertinoColors.white),
-        ),
         backgroundColor: valo,
+        title: const Text(
+          "Add Products",
+          style: TextStyle(color:CupertinoColors.white),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
           child: Column(
             children: [
               SizedBox(
-                  height: 180,
-                  width: 200,
-                  child: selectedImages.isNotEmpty
-                      ? ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: selectedImages.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.file(
-                                selectedImages[index],
-                                width: 200,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              ),
-                            );
-                          },
-                        )
-                      : Image.asset(
-                          "assets/images/noimage.jpg",
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        )),
-              SizedBox(
-                height: 15,
+                height: 180,
+                width: 300,
+                child: selectedImage.isNotEmpty
+                    ? ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: selectedImage.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.file(
+                              selectedImage[index],
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        "assets/images/noimage.jpg",
+                        width: 130,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+              ),
+              // Image.asset(img,height: 200,width: 200,),
+              const SizedBox(
+                height: 10,
               ),
               Container(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    ImagePicker imagePicker = ImagePicker();
-                    List<XFile>? files = await imagePicker.pickMultiImage();
+                    onPressed: () async {
+                      ImagePicker imagePicker = ImagePicker();
+                      List<XFile>? files = await imagePicker.pickMultiImage();
+                      if (files == null) return;
 
-                    selectedImages =
-                        files.map((file) => File(file.path)).toList();
-                    setState(() {});
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: valo,
-                  ),
-                  child: const Text(
-                    'Select Images',
-                    style: TextStyle(color: CupertinoColors.white),
-                  ),
-                ),
+                      selectedImage =
+                          files.map((file) => File(file.path)).toList();
+                      setState(() {});
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: valo,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4))),
+                    child: const Text(
+                      "Select Image",
+                      style: TextStyle(color: CupertinoColors.white),
+                    )),
               ),
+
               const SizedBox(
                 height: 20,
               ),
+
               CategoryDropdown(
                 selectedCategory: selectedCategory,
                 onChanged: (value) {
@@ -264,9 +282,7 @@ class _addProductsScreenState extends State<addProductsScreen> {
                   });
                 },
               ),
-              const SizedBox(
-                height: 25,
-              ),
+              const SizedBox(height: 20),
               SubCategoryDropdown(
                 selectedCategory: selectedCategory ?? "",
                 selectedSubCategory: selectedSubCategory,
@@ -276,245 +292,291 @@ class _addProductsScreenState extends State<addProductsScreen> {
                   });
                 },
               ),
-              // Other form fields
-              const SizedBox(
-                height: 25,
-              ),
+              const SizedBox(height: 20),
+
               TextFormField(
-                controller: productController,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_name,
                 decoration: InputDecoration(
-                  hintText: 'Product Name',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Name",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: priceController,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_price,
+                keyboardType: const TextInputType.numberWithOptions(),
                 decoration: InputDecoration(
-                  hintText: 'Product Price',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Price",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: discountController,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: discount,
                 decoration: InputDecoration(
-                  hintText: 'Discount',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Discount",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: newpriceController,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_newprice,
                 decoration: InputDecoration(
-                  hintText: 'Product New Price',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product New Price",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: colorController,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_color,
                 decoration: InputDecoration(
-                  hintText: 'Product Color',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Color",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: product1Controller,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_title1,
                 decoration: InputDecoration(
-                  hintText: 'Product Title 1',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Title 1",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
-              TextFormField(
-                controller: title1Controller,
+              TextFormField(textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_detail1,
                 decoration: InputDecoration(
-                  hintText: 'Title 1 detail',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Detail",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: product2Controller,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_title2,
                 decoration: InputDecoration(
-                  hintText: 'Product Title 2',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Title 2",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: title2Controller,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_detail2,
                 decoration: InputDecoration(
-                  hintText: 'Title 2 detail',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Detail",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: product3Controller,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_title3,
                 decoration: InputDecoration(
-                  hintText: 'Product Title 3',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Title 3",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: title3Controller,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_detail3,
                 decoration: InputDecoration(
-                  hintText: 'Title 3 detail',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Detail",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: product4Controller,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_title4,
                 decoration: InputDecoration(
-                  hintText: 'Product Title 4',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Title 4",
                 ),
               ),
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
               TextFormField(
-                controller: title4Controller,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_detail4,
                 decoration: InputDecoration(
-                  hintText: 'Title 4 detail',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
-                  ),
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "Product Detail",
                 ),
               ),
+
               const SizedBox(
-                height: 25,
+                height: 20,
+              ),
+
+              TextFormField(
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: product_Description,
+                // controller: productDescriptionController,
+                maxLines:
+                    3, // Adjust the number of lines according to your design
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                  hintText: "Product Description",
+                ),
+              ),
+
+              const SizedBox(
+                height: 20,
               ),
               TextFormField(
-                maxLines: 6,
-                controller: descriptionController,
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                controller: all_details,
+                maxLines: 5,
                 decoration: InputDecoration(
-                  hintText: 'Product Description',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(color: Colors.cyan),
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green)),
+                  hintText: "All Detail",
                 ),
               ),
+
               const SizedBox(
-                height: 25,
+                height: 20,
               ),
+
               Container(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    addProductToFirestore();
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: valo),
-                  child: isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
-                      : const Text(
-                          'Add Product',
-                          style: TextStyle(
-                              fontSize: 20, color: CupertinoColors.white),
-                        ),
-                ),
+                    onPressed: () {
+                      addProductsToFireStore();
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: valo,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4))),
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                          )
+                        : const Text(
+                            "Add Product",
+                            style: TextStyle(color: Colors.white),
+                          )),
               )
             ],
           ),
@@ -619,12 +681,12 @@ class SubCategoryDropdown extends StatelessWidget {
           onChanged: onChanged,
           decoration: InputDecoration(
             labelText: "SubCategory",
-            labelStyle: TextStyle(color: Colors.black), // Updated here
+            labelStyle: const TextStyle(color: Colors.black), // Updated here
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
             ),
             focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: valo), // Updated here
+                borderSide: const BorderSide(color: valo), // Updated here
                 borderRadius: BorderRadius.circular(10)),
           ),
           items: subCategories.map((SubCategoryModel subCategory) {

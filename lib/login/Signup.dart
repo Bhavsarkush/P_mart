@@ -1,182 +1,319 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'Login.dart';
+import 'package:p_mart/Admin.dart';
+import 'package:p_mart/login/Login.dart';
 import '../color.dart';
 
-class Shop extends StatefulWidget {
+
+class EShop extends StatefulWidget {
   @override
-  State<Shop> createState() => _ShopState();
+  State<EShop> createState() => _EShopState();
 }
 
-class _ShopState extends State<Shop> {
+class _EShopState extends State<EShop> {
+  final Form_key = GlobalKey<FormState>();
+  bool passwordVisible = false;
+  bool con_passwordVisible = false;
+  TextEditingController name = TextEditingController();
+  TextEditingController pnumber = TextEditingController();
+  TextEditingController email = TextEditingController();
+  TextEditingController pass = TextEditingController();
+  TextEditingController cpass = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          child: Column(
-            children: [
-              const SizedBox(height: 50),
-              const Center(
-                child: Text(
-                  "Sign up",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 30,
-                      color: Colors.black),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      appBar: AppBar(
+        backgroundColor: valo,
+        title: Text(
+          'Welcome to PeakMart',
+          style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: CupertinoColors.white),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+        child: SingleChildScrollView(
+          child: Form(
+            key: Form_key,
+            child: Container(
+              margin: const EdgeInsets.only(left: 20, right: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Text(
-                      "Create Your Account",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Text(
+                    'Create Your Account',
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: CupertinoColors.black),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 30),
+                    child: TextFormField(
+                      controller: name,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter your name";
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Enter your username",
+                        hintStyle: TextStyle(color: CupertinoColors.black),
+                        label: const Text("Username"),
+                        labelStyle: TextStyle(color: CupertinoColors.black),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(20)),
+                            borderSide:
+                            BorderSide(color: CupertinoColors.black)),
+                        prefixIcon: const Icon(Icons.account_box_rounded),
+                      ),
                     ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 30),
+                    child: TextFormField(
+                      controller: pnumber,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter Phone Number";
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Enter your Phone Number",
+                        hintStyle: TextStyle(color: CupertinoColors.black),
+                        label: const Text(
+                          "Phone Number",
+                          style: TextStyle(color: CupertinoColors.black),
+                        ),
+                        labelStyle: TextStyle(color: CupertinoColors.black),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(20)),
+                            borderSide:
+                            BorderSide(color: CupertinoColors.black)),
+                        prefixIcon: const Icon(Icons.phone_android),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 30),
+                    child: TextFormField(
+                      keyboardType: TextInputType.emailAddress,
+                      controller: email,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter your email";
+                        } else if (!value.contains("@") ||
+                            !value.contains(".")) {
+                          return "Please enter valid email";
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                          hintText: "Enter your email",
+                          hintStyle: TextStyle(color: CupertinoColors.black),
+                          label: const Text("Email"),
+                          labelStyle: TextStyle(color: CupertinoColors.black),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(20)),
+                              borderSide:
+                              BorderSide(color: CupertinoColors.black)),
+                          prefixIcon: const Icon(Icons.email_outlined)),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 30),
+                    child: TextFormField(
+                      controller: pass,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter Password";
+                        }
+                        return null;
+                      },
+                      obscureText: !passwordVisible,
+                      decoration: InputDecoration(
+                        hintText: "Enter your Password",
+                        hintStyle: TextStyle(color: CupertinoColors.black),
+                        label: const Text("Password"),
+                        labelStyle: TextStyle(color: CupertinoColors.black),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(20)),
+                            borderSide:
+                            BorderSide(color: CupertinoColors.black)),
+                        prefixIcon:
+                        const Icon(Icons.lock_outline_rounded),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              passwordVisible = !passwordVisible;
+                            });
+                          },
+                          icon: Icon(
+                            passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 30),
+                    child: TextFormField(
+                      controller: cpass,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter Password";
+                        }
+                        if (value != pass.text) {
+                          return "Passwords do not match";
+                        }
+                        return null;
+                      },
+                      obscureText: !con_passwordVisible,
+                      decoration: InputDecoration(
+                        hintText: "Please confirm your password",
+                        hintStyle: TextStyle(color: CupertinoColors.black),
+                        label: const Text("Confirm Password"),
+                        labelStyle: TextStyle(color: CupertinoColors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(20)),
+                            borderSide:
+                            BorderSide(color: CupertinoColors.black)),
+                        prefixIcon:
+                        const Icon(Icons.lock_outline_rounded),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              con_passwordVisible = !con_passwordVisible;
+                            });
+                          },
+                          icon: Icon(
+                            con_passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.bottomRight,
+                    padding: const EdgeInsets.all(20),
+                    child: SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (Form_key.currentState!.validate()) {
+                            try {
+                              await FirebaseAuth.instance
+                                  .createUserWithEmailAndPassword(
+                                email: email.text,
+                                password: pass.text,
+                              )
+                                  .then((value) {
+                                FirebaseFirestore.instance
+                                    .collection("Admin")
+                                    .add({
+                                  "Username": name.text,
+                                  "Email": email.text,
+                                  "Password": pass.text,
+                                  "Phone Number":pnumber.text,
+                                });
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "Register Successfully")));
+                              name.clear();
+                              pnumber.clear();
+                              email.clear();
+                              pass.clear();
+                              cpass.clear();
+                            } on FirebaseAuthException catch (e) {
+                              if (e.code == 'weak-password') {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content:
+                                  Text("Password is too weak"),
+                                ));
+                              } else if (e.code == 'email-already-in-use') {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text(
+                                      "Email is already Registered"),
+                                ));
+                              }
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: valo,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(70),
+                          ),
+                        ),
+                        child: Text(
+                          'Register Your Self',
+                          style: TextStyle(color: CupertinoColors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Already have an Account ?"),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => login(),
+                                ));
+                          },
+                          child: const Text(
+                            "Login",
+                            style: TextStyle(color: valo),
+                          ))
+                    ],
                   )
                 ],
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: "Username",
-                    labelStyle: TextStyle(color: valo),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: valo),
-                        borderRadius: BorderRadius.circular(20)),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: "Email",
-                    labelStyle: TextStyle(color: valo),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: valo),
-                        borderRadius: BorderRadius.circular(20)),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: "Enter your phone number",
-                    labelStyle: TextStyle(color: valo),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(50)),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: valo),
-                        borderRadius: BorderRadius.circular(20)),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    labelStyle: TextStyle(color: valo),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: valo),
-                        borderRadius: BorderRadius.circular(20)),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: "Confirm Password",
-                    labelStyle: TextStyle(color: valo),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: valo),
-                        borderRadius: BorderRadius.circular(20)),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Center(
-                  child: SizedBox(
-                height: 50,
-                width: 250,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(valo),
-                      foregroundColor: MaterialStateProperty.all(Colors.white)),
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const login()));
-                  },
-                  child: const Text(
-                    "Sign up",
-                  ),
-                ),
-              )),
-              SizedBox(
-                height: 10,
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text(
-                  "Already have an Account?",
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                TextButton(
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(valo),
-                        foregroundColor:
-                            MaterialStateProperty.all(Colors.white)),
-                    onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => login()));
-                    },
-                    child: Text(
-                      "Login",
-                    ))
-              ]),
-            ],
+            ),
           ),
         ),
       ),

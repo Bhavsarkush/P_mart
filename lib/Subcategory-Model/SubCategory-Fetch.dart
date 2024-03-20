@@ -7,8 +7,7 @@ import 'package:p_mart/Subcategory-Model/Subcategory.dart';
 import '../color.dart';
 import 'EditScrn.dart';
 import 'ModelSubCategory.dart';
-import 'SubCategory-Fetch.dart';
-import 'SubCategory-Fetch.dart';
+
 
 class SubCategory extends StatefulWidget {
   const SubCategory({Key? key}) : super(key: key);
@@ -167,7 +166,7 @@ class SubCategoryListWidget extends StatelessWidget {
                 // For example, navigate to another screen or perform an action
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => EditSubCategoryScreen(Subcategory: subCategory, image: subCategory.image)),
+                  MaterialPageRoute(builder: (context) => EditSubCategoryScreen(Subcategory: subCategory, image: subCategory.image,)),
                 );
               },
               child: Dismissible(

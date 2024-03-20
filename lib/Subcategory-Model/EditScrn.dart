@@ -6,12 +6,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-
 import '../Category/CategoryModel.dart';
 import '../color.dart';
 import 'ModelSubCategory.dart';
 import 'SubCategory-Fetch.dart';
-
 
 class EditSubCategoryScreen extends StatefulWidget {
   final SubCategoryModel Subcategory;
@@ -29,8 +27,6 @@ class _EditSubCategoryScreenState extends State<EditSubCategoryScreen> {
   TextEditingController SubcategoryController = TextEditingController();
   bool isLoading = false;
 
-   // Track loading state
-
   @override
   void initState() {
     super.initState();
@@ -42,11 +38,10 @@ class _EditSubCategoryScreenState extends State<EditSubCategoryScreen> {
       isLoading = true; // Set loading state to true
     });
 
-    // Firestore reference to the category document
-    DocumentReference categoryRef = FirebaseFirestore.instance
+    // Firestore reference to the subcategory document
+    DocumentReference subcategoryRef = FirebaseFirestore.instance
         .collection('SubCategories')
         .doc(widget.Subcategory.id);
-
 
     Map<String, dynamic> updatedData = {
       'subCategory': SubcategoryController.text,
@@ -57,29 +52,38 @@ class _EditSubCategoryScreenState extends State<EditSubCategoryScreen> {
       // Upload the new image to Firebase Storage
       String imageUrl = await uploadImageToStorage(selectedImage!);
       updatedData['image'] = imageUrl;
-      // Update the image URL in Firestore
     }
 
-    try {
-      // Update the category document in Firestore
-      await categoryRef.update(updatedData);
+    // Check if the category name is not empty
+    if (SubcategoryController.text.isNotEmpty || selectedImage != null) {
+      try {
+        // Update the subcategory document in Firestore
+        await subcategoryRef.update(updatedData);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Category updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to update category'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() {
+          isLoading = false; // Set loading state to false
+        });
+      }
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Category updated successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to update category'),
+          content: Text('Please enter the category name or select an image'),
           backgroundColor: Colors.red,
         ),
       );
-    } finally {
-      setState(() {
-        isLoading = false; // Set loading state to false
-      });
     }
   }
 
@@ -90,13 +94,14 @@ class _EditSubCategoryScreenState extends State<EditSubCategoryScreen> {
     await storageRef.putFile(imageFile);
     return await storageRef.getDownloadURL();
   }
+
   String? selectedSubCategory;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: valo,
-
         title: Text(
           'Edit Category',
           style: TextStyle(color: CupertinoColors.white),
@@ -176,7 +181,8 @@ class _EditSubCategoryScreenState extends State<EditSubCategoryScreen> {
                   ) // Show the progress indicator
                       : const Text(
                     "Update Category",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style:
+                    TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),

@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:p_mart/login/Login.dart';
 
+import 'demo.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Firebase.initializeApp();
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: login(),
+      home:login(),
       debugShowCheckedModeBanner: false,
     );
   }

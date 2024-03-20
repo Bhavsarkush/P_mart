@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:p_mart/Category/FetchCategory.dart';
 import 'package:p_mart/Product/Addporduct.dart';
 import 'package:p_mart/Subcategory-Model/SubCategory-Fetch.dart';
-import 'Brand/AddBrand.dart';
-import 'Brand/fetch-Brand.dart';
+import 'package:p_mart/login/Login.dart';
+import 'Banner/fetch-Banner.dart';
 import 'Product/product-fetch.dart';
+import 'demo.dart';
 import 'login/Signup.dart';
 import 'color.dart';
 
@@ -62,24 +63,36 @@ class _AdminState extends State<Admin> {
                 Navigator.pop(context);
               },
             ),
+            SizedBox(
+              height: 10,
+            ),
             ListTile(
               leading: const Icon(Icons.add_box),
               title: const Text("Orders"),
               onTap: _openOrdersScreen,
+            ),
+            SizedBox(
+              height: 10,
             ),
             ListTile(
               leading: const Icon(Icons.notification_add),
               title: const Text("Notifications"),
               onTap: () {},
             ),
-            ListTile(
-              leading: const Icon(Icons.share),
-              title: const Text("Share"),
-              onTap: () {},
+            SizedBox(
+              height: 10,
             ),
             ListTile(
-              leading: const Icon(Icons.rate_review),
-              title: const Text("Rate Us"),
+              leading: const Icon(Icons.nightlight),
+              title: const Text("Theme"),
+              onTap: () {},
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text("Log Out"),
               onTap: () {},
             ),
           ],
@@ -190,18 +203,19 @@ class _AdminState extends State<Admin> {
 
   void _openProductsScreen() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) =>ProductScreen()));
+        context, MaterialPageRoute(builder: (context) => ProductScreen()));
   }
 
   void _openAllUsersScreen() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => Shop()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => EShop()));
   }
 
   void _openBannerScreen() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => FetchBanner()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => FetchBanner()));
   }
 
   void _openOrdersScreen() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => Shop()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => EShop()));
   }
 }

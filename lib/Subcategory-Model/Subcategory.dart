@@ -12,7 +12,7 @@ import '../Category/CategoryModel.dart';
 import '../color.dart';
 
 class AddSubCategory extends StatefulWidget {
-  const AddSubCategory({super.key,});
+  const AddSubCategory({Key? key}) : super(key: key);
 
   @override
   State<AddSubCategory> createState() => _AddSubCategoryState();
@@ -28,46 +28,48 @@ class _AddSubCategoryState extends State<AddSubCategory> {
   Future<void> AddSubCategory() async {
     final user = Sub_Category.text.trim();
 
-    if (user.isEmpty) {
+    if (user.isEmpty || Sub_Category == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Please enter a subCategory name")));
-      // return;
+        const SnackBar(content: Text("Please enter a Subcategory name  ")),
+      );
+      return;
+    }
+    if (user.isEmpty || selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a category name  ")),
+      );
+      return;
+    }
+    if (user.isEmpty || selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a Image name  ")),
+      );
+      return;
     }
 
-    if (selectedImage != null) {
-      Reference referenceRoot = FirebaseStorage.instance.ref();
-      Reference referenceDirImages = referenceRoot.child('SubCategory_images');
-      Reference referenceImageToUpload =
-          referenceDirImages.child(uniquefilename);
+    Reference referenceRoot = FirebaseStorage.instance.ref();
+    Reference referenceDirImages = referenceRoot.child('SubCategory_images');
+    Reference referenceImageToUpload =
+    referenceDirImages.child(uniquefilename);
 
-      try {
-        await referenceImageToUpload.putFile(selectedImage!);
-        Imageurl = await referenceImageToUpload.getDownloadURL();
-        print("Image URL: $Imageurl");
+    try {
+      await referenceImageToUpload.putFile(selectedImage!);
+      Imageurl = await referenceImageToUpload.getDownloadURL();
+      print("Image URL: $Imageurl");
 
-        FirebaseFirestore.instance.collection("SubCategories").add({
-          'category': selectedCategory,
-          'subCategory': Sub_Category.text.trim(),
-          'image': Imageurl,
-        }).then((value) {
-          Sub_Category.clear();
-          selectedImage = null;
-          setState(() {
-            isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Category Added Successfully")));
-        });
-      } catch (error) {
-        print("Error uploading image: $error");
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select an image")),
-      );
+      await FirebaseFirestore.instance.collection("SubCategories").add({
+        'category': selectedCategory,
+        'subCategory': Sub_Category.text.trim(),
+        'image': Imageurl,
+      });
+
       setState(() {
         isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Category Added Successfully")));
+    } catch (error) {
+      print("Error uploading image: $error");
     }
   }
 
@@ -77,7 +79,10 @@ class _AddSubCategoryState extends State<AddSubCategory> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: valo,
-        title: Text("SubCategory",style: TextStyle(color:CupertinoColors.white,),),
+        title: const Text(
+          'SubCategory',
+          style: TextStyle(color: CupertinoColors.white),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -92,82 +97,86 @@ class _AddSubCategoryState extends State<AddSubCategory> {
               },
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
               child: TextFormField(
                 controller: Sub_Category,
                 decoration: InputDecoration(
-                  hintText: "Category Name",
+                  hintText: "SubCategory Name",
                   hintStyle: TextStyle(color: valo),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                   focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: valo),
-                      borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(color: valo),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
               ),
             ),
-            ),
             selectedImage != null
                 ? Image.file(selectedImage!, width: 200, height: 200)
-                : Image.asset("assets/images/noimage.jpg",
-                    width: 200, height: 200),
+                : Image.asset(
+              "assets/images/noimage.jpg",
+              width: 200,
+              height: 200,
+            ),
             SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
               child: SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: ElevatedButton(
-                      onPressed: () async {
-                        ImagePicker imagePicker = ImagePicker();
-                        XFile? file = await imagePicker.pickImage(
-                            source: ImageSource.gallery);
-                        if (file == null) return;
-                        selectedImage = File(file.path);
-                        setState(() {});
-                      },
-                      style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all(RoundedRectangleBorder()),
-                          backgroundColor:
-                              MaterialStateProperty.all(CupertinoColors.white)),
-                      child: Text(
-                        "Select Image",
-                        style: TextStyle(color: valo),
-                      ))),
+                height: 50,
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    ImagePicker imagePicker = ImagePicker();
+                    XFile? file = await imagePicker.pickImage(
+                      source: ImageSource.gallery,
+                    );
+                    if (file == null) return;
+                    selectedImage = File(file.path);
+                    setState(() {});
+                  },
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder()),
+                    backgroundColor: MaterialStateProperty.all(CupertinoColors.white),
+                  ),
+                  child: Text(
+                    "Select Image",
+                    style: TextStyle(color: valo),
+                  ),
+                ),
+              ),
             ),
             SizedBox(height: 15),
-        
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
               child: SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      setState(() {
-                        isLoading = true;
-                      });
-                      await AddSubCategory();
-        
-                      setState(() {
-                        isLoading = false;
-                      });
-                    },
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder()),
-                      backgroundColor: MaterialStateProperty.all(valo),
-                    ),
-                    child: isLoading
-                        ? CircularProgressIndicator(
-                            color: Colors.white,
-                          )
-                        : Text(
-                            "Add SubCategory",
-                            style: TextStyle(color: CupertinoColors.white),
-                          ),
-                  )),
+                height: 50,
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    await AddSubCategory();
+                    setState(() {
+                      isLoading = false;
+                    });
+                  },
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder()),
+                    backgroundColor: MaterialStateProperty.all(valo),
+                  ),
+                  child: isLoading
+                      ? CircularProgressIndicator(
+                    color: Colors.white,
+                  )
+                      : Text(
+                    "Add SubCategory",
+                    style: TextStyle(color: CupertinoColors.white),
+                  ),
+                ),
+              ),
             )
           ],
         ),
@@ -179,8 +188,8 @@ class _AddSubCategoryState extends State<AddSubCategory> {
 class productdropdown extends StatelessWidget {
   final String? selectedCategory;
   final ValueChanged<String?> onChanged;
-  const productdropdown(
-      {super.key, this.selectedCategory, required this.onChanged});
+  const productdropdown({Key? key, this.selectedCategory, required this.onChanged})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

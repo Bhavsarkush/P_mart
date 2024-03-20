@@ -1,14 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:p_mart/Product/Addporduct.dart';
+import 'package:p_mart/Product/EditProduct.dart';
+import 'package:p_mart/Product/Model.dart';
 
-import 'Addporduct.dart';
-import 'EditProduct.dart';
-import 'Model.dart';
-
+import '../color.dart';
 
 class ProductScreen extends StatefulWidget {
-  const ProductScreen({super.key});
+  const ProductScreen({Key? key}) : super(key: key);
 
   @override
   State<ProductScreen> createState() => _ProductScreenState();
@@ -17,95 +17,96 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   String _searchText = '';
 
-
-
   void _deleteProduct(String productID) {
     FirebaseFirestore.instance
         .collection('Products')
         .doc(productID)
         .delete()
         .then((value) {
-      Fluttertoast.showToast(
-        msg: 'Product Deleted Successfully',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
+      _showToast('Product Deleted Successfully', Colors.green);
     }).catchError((error) {
-      Fluttertoast.showToast(
-        msg: 'Failed to delete category',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
+      _showToast('Failed to delete category', Colors.red);
     });
+  }
+
+  void _showToast(String message, Color backgroundColor) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: backgroundColor,
+      textColor: Colors.white,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: valo,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 14),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => addProductScreen()),
+                );
+              },
+              child: Icon(Icons.add, color: valo),
+            ),
+          )
+        ],
         title: const Text(
           'Products',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.cyan,
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.cyan.withOpacity(.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.cyan),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: TextFormField(
-                    onChanged: (value) {
-                      setState(() {
-                        _searchText = value.toLowerCase();
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Search Product...',
-                      hintStyle: TextStyle(color: Colors.cyan),
-                      suffixIcon: Icon(Icons.search),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: valo.withOpacity(.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: valo),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextFormField(
+                      onChanged: (value) {
+                        setState(() {
+                          _searchText = value.toLowerCase();
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Search Product',
+                        hintStyle: TextStyle(color: valo),
+                        suffixIcon: Icon(Icons.search, color: valo),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              ProductList(deleteProduct: _deleteProduct, searchText: _searchText),
-            ],
+                const SizedBox(
+                  height: 10,
+                ),
+                ProductList(
+                  deleteProduct: _deleteProduct,
+                  searchText: _searchText,
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.cyan,
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const addProductsScreen()));
-        },
-        child: const Icon(
-          Icons.add,
-          color: Colors.black,
-          size: 25.0,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
@@ -123,34 +124,86 @@ class ProductList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('Products').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final productDocs = snapshot.data!.docs;
-          List<ProductModel> products = [];
+      stream: FirebaseFirestore.instance.collection('Products').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final productDocs = snapshot.data!.docs;
+        List<ProductModel> products = productDocs
+            .map((doc) => ProductModel.fromSnapshot(doc))
+            .toList();
 
-          for (var doc in productDocs) {
-            final product = ProductModel.fromSnapshot(doc);
-            products.add(product);
-          }
+        List<ProductModel> filteredProducts = products
+            .where((product) =>
+            product.productName.toLowerCase().contains(searchText))
+            .toList();
 
-          List<ProductModel> filteredProducts = products
-              .where((product) =>
-              product.productName.toLowerCase().contains(searchText))
-              .toList();
-
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: filteredProducts.length,
-            itemBuilder: (context, index) {
-              final product = filteredProducts[index];
-              String imageUrl =
-              product.images!.isNotEmpty ? product.images![0] : '';
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: filteredProducts.length,
+          itemBuilder: (context, index) {
+            final product = filteredProducts[index];
+            String imageUrl =
+            product.images!.isNotEmpty ? product.images![0] : '';
+            return Dismissible(
+              key: UniqueKey(),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                color: Colors.red,
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: const Icon(
+                  Icons.delete,
+                  color: Colors.white,
+                ),
+              ),
+              confirmDismiss: (direction) async {
+                if (direction == DismissDirection.endToStart) {
+                  return await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Confirm'),
+                        content: const Text(
+                            'Are you sure you want to delete this product?'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('CANCEL'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('DELETE'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+                return false;
+              },
+              onDismissed: (direction) {
+                if (direction == DismissDirection.endToStart) {
+                  deleteProduct(product.id);
+                }
+              },
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProduct(
+                        product: product,
+                        images: product.images != null &&
+                            product.images!.isNotEmpty
+                            ? product.images![0]
+                            : '',
+                      ),
+                    ),
+                  );
+                },
                 child: Card(
                   elevation: 5,
                   child: Column(
@@ -182,70 +235,7 @@ class ProductList extends StatelessWidget {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20.0),
                               ),
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => EditProduct(
-                                          product: product,
-                                          images: product.images != null &&
-                                              product.images!.isNotEmpty
-                                              ? product.images![0]
-                                              : '',
-                                        )),
-                                  );
-                                },
-                                child: const Text(
-                                  'Edit',
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.cyan),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 20),
-                            child: Container(
-                              width: 70,
-                              height: 35,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              child: TextButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text(
-                                          'Confirm Deletion',
-                                        ),
-                                        content: const Text(
-                                            'Are you sure you want to delete this category?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              deleteProduct(product.id);
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text('Yes'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                child: const Text('Delete',
-                                    style: TextStyle(
-                                        fontSize: 12, color: Colors.red)),
-                              ),
+
                             ),
                           ),
                         ],
@@ -253,9 +243,11 @@ class ProductList extends StatelessWidget {
                     ],
                   ),
                 ),
-              );
-            },
-          );
-        });
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }
